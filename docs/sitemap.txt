@@ -1,0 +1,24 @@
+Site map
+
+./
+	./aprp/
+		./app/profiles/
+			./app/profiles/<id>/
+				.../show
+				.../edit
+				.../save
+		./app/missions/
+			./app/missions/<id>/
+				.../show
+				.../fly
+				.../
+		./app/stash/
+			?
+		./app/train/
+			./app/train/abilities/
+			./app/train/neuro/
+		./app/rnd/
+			./app/rnd/rnd/
+			./app/rnd/nfo/
+	./admin/
+	./nfo

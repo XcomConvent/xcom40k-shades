@@ -1,0 +1,3 @@
+[INFO     @ 2012-01-04 15:17:10.633410+00:00] // PROFILE //: user #1 views his profile
+[WARNING  @ 2012-01-04 15:17:10.633847+00:00] // PROFILE //: user #1 views his profile: warning
+[CRITICAL @ 2012-01-04 15:17:10.634082+00:00] // PROFILE //: user #1 views his profile: shout

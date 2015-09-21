@@ -1,0 +1,30 @@
+<html>
+<head>
+</head>
+<body bgcolor = '#e8e877'>
+<hr>
+<h1> Content:</h1>
+{% block content %}
+
+	<hr>
+	<h2> Main: </h2>
+	{% block main %}
+	{% endblock main %}
+
+	<hr>
+	<h2> Side: </h2>
+		<ul>
+		{% for component in list_components %}
+			<li><a href = "{% url 'app:index' %}{{ component.url }}">{{ component.name }}</a></li>
+		{% endfor %}
+		</ul>
+
+	{% if user.username == '' %}
+	<hr>
+	<h2> Login: </h2>
+	{% include 'app/auth/login.html' %}
+	{% endif %}
+{% endblock content %}
+<hr>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{% extends "app/index.html" %}
+
+{% block main %}
+<p> User: {{ user.username }}
+<p> <a href = "{% url 'app:profile.users.edit' %}">Edit</a>
+
+<ul>
+	{% for chr in related_chars %}
+	<li> View <a href = "{% url 'app:profile.chars.view' chr.pk %}">{{chr.name}}</a></li>
+	{% endfor %}
+</ul>
+
+<form action = "{% url 'app:logout' %}" method = "post">
+{% csrf_token %}
+<input type = "submit" value = "Logout">
+</form>
+
+{% endblock main %}
+

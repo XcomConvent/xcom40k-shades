@@ -1,0 +1,41 @@
+Here the logging policy is explained.
+
+xcom40k-shades has 3 levels of log entries:
+	INFO: for stash, train and profile operations
+	WARNING: for events meant to be evil, but which were denied; e.g. unauthorized access to /admin/.
+	CRITICAL: for events which need master's attention immediately.
+
+Here is the complete list of possible log entries:
+
+	COMPONENT: admin:
+	LEVEL: WARNING
+	CONDITION: A non-staff user attempted to log in to admin, but was denied
+	ENTRY: User <username> tried to log in the '/admin/'; access denied.
+
+	COMPONENT: app:profile
+	LEVEL: INFO
+	CONDITION: User changes his username/password
+	ENTRY: User <username> changes username/password to <username>/.
+	
+	COMPONENT: app:train
+	LEVEL: INFO
+	CONDITION: Character have trained a new ability
+	ENTRY: Char <character name> (host '<host's username>') + <ability> (<ability class>), spending <exp> exp
+
+	COMPONENT: app:stash
+	LEVEL: INFO
+	CONDITION: Character have bought a new item from public stash
+	ENTRY: Item transaction: [public stash] -> [<host's username>], item <item> x<count>.
+
+	COMPONENT: app:stash
+	LEVEL: CRITICAL
+	CONDITION: Current stash condition does not match the backup-ed one, based on logged history
+	ENTRY: Stash is tampered; versions <current date> and <backup date> does not match based on logs.
+
+	COMPONENT: app:
+	LEVEL: CRITICAL
+	CONDITION: Automated tests for 'app' component have just failed; see the tests.py
+	ENTRY: Automated tests failed. See <test output file> for details.
+
+
+

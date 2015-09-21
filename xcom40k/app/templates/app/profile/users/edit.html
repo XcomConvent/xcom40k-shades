@@ -1,0 +1,11 @@
+{% extends "app/index.html" %}
+
+{% block main %}
+<form action="{% url 'app:profile.users.edit' %}" method="post">
+{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" value="OK" />
+</form>
+
+{% endblock main %}
+

@@ -1,0 +1,25 @@
+{% extends "app/index.html" %}
+
+{% block main %}
+
+<h3> Mission "{{mission.name}}" </h3>
+
+<p> Participants: <ul>
+{% for char in parts %}
+	<li> <a href = "{% url 'app:profile.chars.view' char.pk %}">{{ char.name }}</a>
+		{% if char in chars %}
+			<a href = "{% url 'app:missions.rm' mission.pk char.pk %}"> Remove </a>
+		{% endif %}
+	</li>
+{% endfor %}
+</ul>
+
+<p> Your idle chars: <ul>
+{% for char in idlers %}
+	<li> <a href = "{% url 'app:profile.chars.view' char.pk %}">{{ char.name }}</a>
+		<a href = "{% url 'app:missions.edit' mission.pk char.pk %}">Add</a>
+	</li>
+{% endfor %}
+</ul>
+
+{% endblock main %}

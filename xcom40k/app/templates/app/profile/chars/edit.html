@@ -1,0 +1,20 @@
+{% extends "app/index.html" %}
+
+{# this template is deprecated for now #}
+
+{% block main %}
+<p> User: {{ user.username }}
+<p> Charname: {{ char.name }}
+
+<p>Items:<ul>
+{% for itm in items %}
+	<li>{{itm}}</li>
+{% endfor %}
+</ul>
+
+<p>Abilities:<ul>
+{% for aby in abilities %}
+	<li>{{aby}}</li>
+{% endfor %}
+</ul>
+{% endblock main %}
