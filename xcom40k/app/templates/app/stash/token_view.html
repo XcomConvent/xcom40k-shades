@@ -1,0 +1,13 @@
+{% extends "app/index.html" %}
+
+{% block main %}
+
+<p> Item token:
+{{ it.item }} x{{it.count}}
+<p> <form action = "{% url 'app:stash.tokens.buy' it.pk %}" method = 'POST'>
+{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" value="OK" />
+</form>
+
+{% endblock main %}

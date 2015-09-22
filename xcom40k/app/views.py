@@ -25,16 +25,16 @@ class _Log:
 		self.logger = logging.getLogger('xcom40k.high')
 		self.comp = TAG
 	def _str_complement(self, s, count):
-		return s + (' ' * (count - len(s)))
+		return str(s) + (' ' * (count - len(s)))
 	def d(self, data):
-		self.logger.info    ('[' + self._str_complement('INFO', 8) + ' @ ' + str(timezone.now()) + '/' + BUILD_NAME + ' v' + BUILD_VERSION + '] // ' 
-			+ self._str_complement(str(self.comp), 10) + ' //: ' + data)
+		self.logger.info    ('[' + self._str_complement('INFO', 8) + ' @ ' + str(timezone.now()) + '/' + BUILD_NAME + ' v' + str(BUILD_VERSION) + '] // ' 
+			+ self._str_complement(str(self.comp), 10) + ' //: ' + str(data))
 	def warn(self, data):
-		self.logger.warning ('[' + self._str_complement('WARNING', 8) + ' @ ' + str(timezone.now()) + '/' + BUILD_NAME + '] // ' 
-			+ self._str_complement(str(self.comp), 10) + ' //: ' + data)
+		self.logger.warning ('[' + self._str_complement('WARNING', 8) + ' @ ' + str(timezone.now()) + '/' + BUILD_NAME + ' v' + str(BUILD_VERSION) + '] // ' 
+			+ self._str_complement(str(self.comp), 10) + ' //: ' + str(data))
 	def shout(self, data):
-		self.logger.critical('[' + self._str_complement('CRITICAL', 8) + ' @ ' + str(timezone.now()) + '/' + BUILD_NAME + '] // ' 
-			+ self._str_complement(str(self.comp), 10) + ' //: ' + data)
+		self.logger.critical('[' + self._str_complement('CRITICAL', 8) + ' @ ' + str(timezone.now()) + '/' + BUILD_NAME + ' v' + str(BUILD_VERSION) + '] // ' 
+			+ self._str_complement(str(self.comp), 10) + ' //: ' + str(data))
 
 ''' SITE COMPONENTS
 	The list of site's components is here for listing in sidemenu.
@@ -165,11 +165,11 @@ class site(SiteComponent):
 			TAG = 'CHARS'
 			def view(self, request, char_id):
 				char = Char.objects.filter(pk = char_id)[0]
-				context = {'user': request.user, 'char': char, 'items': char.items.all(), 'abilities': char.abilities.all(), }
+				context = {'user': request.user, 'char': char, 'items': request.user.account.items.all(), 'abilities': char.abilities.all(), }
 				return my_render_wrapper(request, 'app/profile/chars/view.html', context)
 			def edit(self, request, char_id):
 				char = Char.objects.filter(pk = char_id)[0]
-				context = {'user': request.user, 'char': char, 'items': char.items.all(), 'abilities': char.abilities.all(), }
+				context = {'user': request.user, 'char': char, 'items': request.user.account.items.all(), 'abilities': char.abilities.all(), }
 				return my_render_wrapper(request, 'app/profile/chars/edit.html', context)
 			def new(self, request):
 				# ...
@@ -233,14 +233,55 @@ class site(SiteComponent):
 
 	class stash(SiteComponent):
 		TAG = 'STASH'
+		def _get_public_stash(self):
+			root = get_object_or_404(User, username = 'root')
+			public_stash = root.account.items.all()
+			return public_stash
+
 		def index(self, request):
 			return HttpResponseRedirect(reverse('app:stash.view'))
 		def view(self, request):
-			return HttpResponse('View stash tokens')
+			context = {'tokens': self._get_public_stash(), }
+			return my_render_wrapper(request, 'app/stash/view.html', context)
+
 		class token(SiteComponent):
 			TAG = 'STASH-BUY'
+			def _transfer_it(self, source_user, item_token, qty, target_user):
+				if source_user is target_user:
+					return None
+				if item_token.count == qty:
+					item_token.delete()
+				else:
+					item_token.count -= qty
+					item_token.save()
+				these_item = target_user.account.items.filter(item = item_token.item)
+				if len(these_item) == 0:
+					target_user.account.items.create(item = item_token.item, count = qty)
+				else:
+					these_item[0].count += qty
+					these_item[0].save()
+				self.Log.d('Item transaction: [' + source_user.username + '] -> [' + target_user.username + '], item ' + str(item_token.item) + ' x' + str(qty) + '.')
+				return None
+
 			def buy(self, request, token_id):
-				return HttpResponse('Try to buy token #' + str(token_id))
+				code = self.auth(request)
+				if code[0] == 2:
+					return HttpResponseForbidden(code[1])
+				if code[0] == 1:
+					return HttpResponseRedirect(reverse('app:login'))
+				
+				it = get_object_or_404(ItemToken, pk = token_id)
+				if request.method == 'GET':
+					return my_render_wrapper(request, 'app/stash/token_view.html', {'form': TokenBuyForm(), 'it': it})	
+				elif request.method == 'POST':
+					form = TokenBuyForm(request.POST)
+					if form.is_valid() and form.cleaned_data['count'] <= it.count:
+						self._transfer_it(get_object_or_404(User, username = 'root'), it, form.cleaned_data['count'], request.user)
+						return HttpResponseRedirect(reverse('app:stash.view'))
+					else:
+						return HttpResponseRedirect(reverse('app:stash.tokens.buy', args = (token_id,)))
+				else:
+					raise HttpResponseBadRequest('Invalid method, expected GET/POST, found ' + request.method)
 		class sell(SiteComponent):
 			TAG = 'STASH-SELL'
 			def __str__(self):

@@ -29,16 +29,21 @@ class Item(CommonToken):
 
 class ItemToken(models.Model):
 	item = models.ForeignKey(Item)
-	count = models.PositiveIntegerField(default=1)
+	count = models.PositiveIntegerField()
 	price = models.PositiveIntegerField(default=0)
 	available = models.BooleanField(default=True)
 	def __str__(self):
 		return self.item.name + ' x' + str(self.count)
 
+# we strongly recommend you not use Account model; 
+# use django.contrib.auth.User model instead in any occurence you don't know which to choose.
+class Account(models.Model):
+	user = models.OneToOneField(User, on_delete=models.CASCADE)
+	items = models.ManyToManyField(ItemToken, blank=True)
+
 class Char(CommonToken):
 	host = models.ForeignKey(User, default = User.objects.filter(pk=2)[0].pk)
-	abilities = models.ManyToManyField(Ability)
-	items = models.ManyToManyField(ItemToken)
+	abilities = models.ManyToManyField(Ability, blank=True)
 
 class Mission(CommonToken):
 	MISSION_STATUS = (
@@ -56,3 +61,4 @@ class Report(models.Model):
 	pub_date = models.DateField()
 	related_mission = models.ForeignKey(Mission)
 	related_char = models.ForeignKey(Char)
+

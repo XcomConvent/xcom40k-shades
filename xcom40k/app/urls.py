@@ -38,7 +38,7 @@ urlpatterns = [
     # stash
     url(r'^stash/$', views.site().stash().index, name = 'stash'),
     url(r'^stash/view/$', views.site().stash().view, name = 'stash.view'),
-    url(r'^stash/(?P<item_token_id>[0-9]+)/buy/$', views.site().stash().token().buy, name = 'stash.tokens.buy'),
+    url(r'^stash/(?P<token_id>[0-9]+)/buy/$', views.site().stash().token().buy, name = 'stash.tokens.buy'),
     url(r'^stash/sell/add/$', views.site().stash().sell().add, name = 'stash.sell.add'),
     url(r'^stash/sell/make/$', views.site().stash().sell().make, name = 'stash.sell.make'),
 
