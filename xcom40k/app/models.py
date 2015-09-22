@@ -49,7 +49,7 @@ class ClassLevelPair(models.Model):
 		return str(self.cls) + ' ' + str(self.level) + 'lvl'
 
 class Char(CommonToken):
-	host = models.ForeignKey(User, default = User.objects.filter(pk = 2)[0].pk)
+	host = models.ForeignKey(User)
 	classes = models.ManyToManyField(ClassLevelPair)
 	abilities = models.ManyToManyField(Ability, blank = True)
 
