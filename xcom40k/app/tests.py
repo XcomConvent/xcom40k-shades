@@ -55,7 +55,7 @@ class QuestionViewTests(TestCase):
             ABOUT: Asserts the root user exists.
             EXPECTED: A user with name 'root' with staff status = True should be found.
         """
-        root_set = User.objects.filter(username = root)
+        root_set = User.objects.filter(username = 'root')
         self.assertEqual(len(root_set), 1)
         self.assertEqual(root_set[0].is_staff, True)
         self.assertEqual(root_set[0].is_superuser, True)

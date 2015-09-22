@@ -19,6 +19,11 @@ class ReportAdmin(admin.ModelAdmin):
 class AccountAdmin(admin.ModelAdmin):
 	list_display = ('user',)
 
+class NeuroRequestAdmin(admin.ModelAdmin):
+	list_display = ('pub_date', 'status', 'teacher', 'pupil')
+
+class ClassLevelPairAdmin(admin.ModelAdmin):
+	list_display = ('cls', 'level')
 
 admin.site.register(Char, CharAdmin)
 admin.site.register(Ability, AbilityAdmin)
@@ -28,3 +33,5 @@ admin.site.register(ItemToken)
 admin.site.register(Mission, MissionAdmin)
 admin.site.register(Report, ReportAdmin)
 admin.site.register(Account, AccountAdmin)
+admin.site.register(NeuroRequest, NeuroRequestAdmin)
+admin.site.register(ClassLevelPair, ClassLevelPairAdmin)

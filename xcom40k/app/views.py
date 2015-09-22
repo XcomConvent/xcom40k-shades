@@ -1,4 +1,5 @@
-from django.shortcuts import render, get_object_or_404
+from functools import wraps
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template import loader
 from django.core.urlresolvers import reverse
 from django.views import generic
@@ -11,6 +12,19 @@ from django.utils import timezone
 from .forms import *
 from .models import *
 from xcom40k.settings import BUILD_NAME, BUILD_VERSION
+from django.views.generic.edit import CreateView, UpdateView, ModelFormMixin
+
+#from django.contrib.auth.decorators import login_required, user_passes_test
+
+def login_required(func):
+	@wraps(func)
+	def wrap(*args, **kwargs):
+		instance = args[0]
+		request = args[1]
+		if (request.user.is_authenticated()):
+			return func(*args, **kwargs)
+		return redirect(reverse('app:login'))
+	return wrap
 
 ''' LOGGING
 	Logging is declared and initialized here.
@@ -70,20 +84,12 @@ def my_render_wrapper(request, template, context):
 class SiteComponent:
 	TAG = 'UNKNOWN'
 	Log = None
+	user = None
 	def __str__(self):
 		return self.TAG
 	def __init__(self):
 		self.Log = _Log(self.TAG)
-	def auth(self, request):
-		if request.user is not None and request.user.username != '':
-			# the password verified for the user
-			if request.user.is_active:
-				return (0, 'OK')
-			else:
-				self.Log.d('An inactive user #' + str(request.user.pk) + ' named ' + str(request.user.username) + ' tried to enter but was denied.')
-				return (2, 'Your account has been disabled')
-		else:
-			return (1, 'Authentication failed')
+			
 
 ''' VIEWS
 	Views are implemented here
@@ -129,24 +135,14 @@ class site(SiteComponent):
 		class users(SiteComponent):
 			TAG = 'USERS'
 
+			@login_required
 			def view(self, request):
-				code = self.auth(request)
-				if code[0] == 2:
-					return HttpResponseForbidden(code[1])
-				if code[0] == 1:
-					return HttpResponseRedirect(reverse('app:login'))
-
 				related_chars = Char.objects.filter(host=request.user.pk)
 				context = {'user': request.user, 'related_chars': related_chars}
 				return my_render_wrapper(request, 'app/profile/users/view.html', context)
 			
+			@login_required
 			def edit(self, request):
-				code = self.auth(request)
-				if code[0] == 2:
-					return HttpResponseForbidden(code[1])
-				if code[0] == 1:
-					return HttpResponseRedirect(reverse('app:login'))
-				
 				if request.method == 'GET':
 					return my_render_wrapper(request, 'app/profile/users/edit.html', {'form': UserEditForm()})	
 				elif request.method == 'POST':
@@ -195,29 +191,29 @@ class site(SiteComponent):
 			return my_render_wrapper(request, 'app/missions/index.html', context)
 		class fly(SiteComponent):
 			TAG = 'FLY'
+
+			@login_required
 			def index(self, request, mission_id):
-				code = self.auth(request)
-				if code[0] == 2:
-					return HttpResponseForbidden(code[1])
-				if code[0] == 1:
-					return HttpResponseRedirect(reverse('app:login'))
 				mis = get_object_or_404(Mission, pk = mission_id)
 				chars = Char.objects.filter(host = request.user.pk)
-				idlers = Char.objects.filter(host = request.user.pk)
+				idlers = []
 				for char in chars:
-					if (char in mis.participants.all()):
-						idlers.remove(char)
+					if (char not in mis.participants.all()):
+						idlers.append(char)
 				context = {'mission': mis, 'chars': chars, 'idlers': idlers, 'parts': mis.participants.all()}
 				return my_render_wrapper(request, 'app/missions/fly.html', context)
+			
+			@login_required
 			def edit(self, request, mission_id, char_id):
 				# todo: equipment-alter room 
+				mis = get_object_or_404(Mission, pk = mission_id)
+				char = get_object_or_404(Char, pk = char_id)
+				mis.participants.add(char)
+				mis.save()
 				return HttpResponseRedirect(reverse('app:missions.view', args = (mission_id,)))
+			
+			@login_required
 			def rm(self, request, mission_id, char_id):
-				code = self.auth(request)
-				if code[0] == 2:
-					return HttpResponseForbidden(code[1])
-				if code[0] == 1:
-					return HttpResponseRedirect(reverse('app:login'))
 				mis = get_object_or_404(Mission, pk = mission_id)
 				char = get_object_or_404(Char, pk = char_id)
 				if (char not in mis.participants.all()):
@@ -225,9 +221,12 @@ class site(SiteComponent):
 				mis.participants.remove(char)
 				mis.save()
 				return HttpResponseRedirect(reverse('app:missions.view', args = (mission_id,)))
-
+		
+		@login_required
 		def pdf(self, request, mission_id):
 			return HttpResponse('Pdf for mission #' + str(mission_id) + ' for user ' + request.user.username)
+
+		@login_required
 		def report(self, request, mission_id):
 			return HttpResponseRedirect(reverse('app:profile.reports.new', args = (mission_id,)))
 
@@ -240,6 +239,7 @@ class site(SiteComponent):
 
 		def index(self, request):
 			return HttpResponseRedirect(reverse('app:stash.view'))
+
 		def view(self, request):
 			context = {'tokens': self._get_public_stash(), }
 			return my_render_wrapper(request, 'app/stash/view.html', context)
@@ -260,16 +260,18 @@ class site(SiteComponent):
 				else:
 					these_item[0].count += qty
 					these_item[0].save()
-				self.Log.d('Item transaction: [' + source_user.username + '] -> [' + target_user.username + '], item ' + str(item_token.item) + ' x' + str(qty) + '.')
+				
+				s = ''
+				if source_user.username == 'root':
+					s = 'Public Stash'
+				else:
+					s = source_user.username
+
+				self.Log.d('[' + s + '] -> [' + target_user.username + '], item ' + str(item_token.item) + ' x' + str(qty) + '.')
 				return None
 
-			def buy(self, request, token_id):
-				code = self.auth(request)
-				if code[0] == 2:
-					return HttpResponseForbidden(code[1])
-				if code[0] == 1:
-					return HttpResponseRedirect(reverse('app:login'))
-				
+			@login_required
+			def buy(self, request, token_id):				
 				it = get_object_or_404(ItemToken, pk = token_id)
 				if request.method == 'GET':
 					return my_render_wrapper(request, 'app/stash/token_view.html', {'form': TokenBuyForm(), 'it': it})	
@@ -282,32 +284,75 @@ class site(SiteComponent):
 						return HttpResponseRedirect(reverse('app:stash.tokens.buy', args = (token_id,)))
 				else:
 					raise HttpResponseBadRequest('Invalid method, expected GET/POST, found ' + request.method)
+		
 		class sell(SiteComponent):
 			TAG = 'STASH-SELL'
-			def __str__(self):
-				return 'STASH-SELL'
+
+			@login_required
 			def add(self, request):
 				return HttpResponse('Add a token for selling')
+
+			@login_required
 			def make(self, request):
 				return HttpResponseRedirect(reverse('app:stash.view'))
 
 	class train(SiteComponent):
 		TAG = 'TRAIN'
+		
+		@login_required
 		def index(self, request):
-			return HttpResponse('Index of training grounds')
-		def edit(self, request, char_id):
-			return HttpResponse('Edit skills of char_id')
-		def save(self, request, char_id):
-			return HttpResponseRedirect(reverse('app:train'))
+			charnames = map(str, Char.objects.filter(host = request.user.pk))
+			abilities = {}
+			for charname in charnames:
+				temp = map(str, Ability.objects.all())
+				temp = tuple(temp)
+				for aby in temp:
+					print aby
+				abilities.update({charname: temp})
+			context = {'charnames': charnames, 'abilities': abilities}
+
+			return my_render_wrapper(request, 'app/train/index.html', context)
+
+		@login_required
+		def edit(self, request, char_id):			
+			if request.method == 'GET':
+				char = get_object_or_404(Char, pk = char_id)
+				class_level_pairs = char.classes.all()
+				for clp in class_level_pairs:
+					print (clp.cls + ' of level ' + clp.level)
+				return HttpResponse('Everything is OK')
+#				return my_render_wrapper(request, 'app/train/edit.html', context)	
+			elif request.method == 'POST':
+				form = AbilityTrainForm(request.POST)
+				if form.is_valid():
+					return HttpResponse('Everything is OK')
+				else:
+					return HttpResponseRedirect(reverse('app:train.edit'))
+			else:
+				raise HttpResponseBadRequest('Invalid method, expected GET/POST, found ' + request.method)		
 		class neuro(SiteComponent):
 			TAG = 'NEURO'
+
+			@login_required
 			def index(self, request):
-				return HttpResponse('Index of neurotrainer')
-			def add(self, request):
-				return HttpResponse('Add a neurotrainer request')
-			def save(self, request):
-				return HttpResponseRedirect(reverse('app:train.neuro'))
-	
+				nrequests = NeuroRequest.objects.filter(status = 0)
+				context = {'nrequests': nrequests}
+				return my_render_wrapper(request, 'app/train/neuro.html', context)
+
+			class NeuroRequestCreateViewGeneric(CreateView):
+				model = NeuroRequest
+				fields =  ['teacher', 'pupil', 'target_class',]
+				template_name = 'app/train/neuro_add.html'
+				#url = reverse('app:train.neuro')
+				def form_valid(self, form):
+					self.object = form.save(commit = False)
+					self.object.pub_date = timezone.now()
+					self.object.save()
+					return super(ModelFormMixin, self).form_valid(form)
+				def get_success_url(self):
+					return reverse('app:train.neuro')
+#			def add(self, request):
+#				return site().train().neuro().NeuroRequestCreateViewGeneric.as_view(request)	
 	class nfo(SiteComponent):
 		TAG = 'NFO'
 		def storyline(self, request):
@@ -316,3 +361,5 @@ class site(SiteComponent):
 			return HttpResponseRedirect('wiki/')
 		def recruit(self, request):
 			return HttpResponseRedirect('wiki/Recruitment.html')
+
+

@@ -1,0 +1,10 @@
+{% extends "app/index.html" %}
+
+{% block main %}
+<form action="{% url 'app:train.edit' char.pk %}" method="post">
+	{% csrf_token %}
+	{{ form.as_p }}
+	<input type="submit" value="OK" />
+</form>
+
+{% endblock main %}

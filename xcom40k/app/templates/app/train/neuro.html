@@ -1,0 +1,13 @@
+{% extends "app/index.html" %}
+
+{% block main %}
+
+<p>Requests: &nbsp; <a href = "{% url 'app:train.neuro.add' %}">Add</a><ul>
+	{% for nrq in nrequests %}
+		<li>{{nrq.teacher}} +[{{nrq.target_class}}] --> {{nrq.pupil}}, created {{nrq.pub_date}}</li>
+	{% empty %}
+		<li> No requests yet </li>
+	{% endfor %}
+</ul>
+
+{% endblock main %}

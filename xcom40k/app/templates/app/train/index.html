@@ -1,0 +1,26 @@
+{% extends "app/index.html" %}
+
+{% block main %}
+
+<p><a href = "{% url 'app:train.neuro' %}"> Neurotraining </a>
+
+<p><table border = "1">
+{% for charname in charnames %}
+	<tr><td>
+		<p>Char {{charname}}
+		<p>Abilities:<ul>
+		{% for aby in abilities.items %}
+			{% if aby.0 == charname %}
+			{% for a in aby.1 %}
+				<li> {{a}} </li>
+			{% endfor %}
+			{% endif %}
+		{% endfor %}
+		</ul>
+	{% empty %}
+	No characters
+	</td></tr>
+{% endfor %}
+</table>
+
+{% endblock main %}
