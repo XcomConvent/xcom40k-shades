@@ -1,0 +1,22 @@
+{% extends 'app/index.html' %}
+
+{% block main %}
+
+<p>{{urls}}
+<p>{{urls.keys}}
+<p>Reported: 
+<ul>
+{% for np in nup %} 
+	<li> <a href = "{{np.url}}">{{np.name}} </a> </li>
+	{% empty %}
+	No submitted reports.
+{% endfor %} 
+</ul>
+
+<form action = "" method = "POST">
+{% csrf_token %}
+{{ form.as_p }}
+<input type = "submit" value = "OK">
+</form>
+
+{% endblock main %}

@@ -1,6 +1,14 @@
-# xcom40k-shades
+# xcom40k
 
-An open-sourced Django project.
+## Current build: xcom40k-shades
 
-Design: Jemar
+An open-source Django project.
+
+## Contrib
+
+Art: Jemar
+
+Design: marqueewinq
+
 Programming: marqueewinq
+

@@ -298,7 +298,16 @@ class site(SiteComponent):
 
 	class train(SiteComponent):
 		TAG = 'TRAIN'
-		
+
+		def _add_exp_bulk(self, mission_id, rewards):
+			for reward in rewards:
+				target_pk = reward[0]
+				target_exp  = reward[1]
+				
+				target_char = get_object_or_404(Char.objects.filter(pk = target_pk))
+				target_char.exp += target_exp
+				target_char.save()
+
 		@login_required
 		def index(self, request):
 			charnames = map(str, Char.objects.filter(host = request.user.pk))
@@ -347,6 +356,7 @@ class site(SiteComponent):
 				def form_valid(self, form):
 					self.object = form.save(commit = False)
 					self.object.pub_date = timezone.now()
+					self.object.closed_date = timezone.now()
 					self.object.save()
 					return super(ModelFormMixin, self).form_valid(form)
 				def get_success_url(self):

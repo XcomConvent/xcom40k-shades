@@ -16,8 +16,8 @@ urlpatterns = [
     url(r'^profile/$', views.site().profile().index, name = 'profile'),
     ## reports 
     url(r'^profile/reports/$', views.site().profile().reports().index, name = 'profile.reports'),
-    url(r'^profile/reports/(?P<report_id>)/view/$', views.site().profile().reports().view, name = 'profile.reports.view'),
-    url(r'^profile/reports/(?P<report_id>)/edit/$', views.site().profile().reports().edit, name = 'profile.reports.edit'),
+    url(r'^profile/reports/(?P<report_id>[0-9]+)/view/$', views.site().profile().reports().view, name = 'profile.reports.view'),
+    url(r'^profile/reports/(?P<report_id>[0-9]+)/edit/$', views.site().profile().reports().edit, name = 'profile.reports.edit'),
 #    url(r'^profile/reports/(?P<report_id>)/pdf/$', views.site().profile().reports().pdf, name = 'profile.reports.pdf'),
     ## users
     url(r'^profile/users/view/$', views.site().profile().users().view, name = 'profile.users.view'),
