@@ -8,7 +8,7 @@ An open-source Django project.
 
 Art: Jemar
 
-Design: marqueewinq
+Design: Gabriel
 
 Programming: marqueewinq
 
