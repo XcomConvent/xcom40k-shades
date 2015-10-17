@@ -117,4 +117,3 @@ class BlogEntry(CommonToken):
 	author = models.ForeignKey(Account)
 	text = models.TextField(max_length=10000)
 	pub_date = models.DateField()
-

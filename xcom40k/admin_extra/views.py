@@ -6,6 +6,7 @@ from app.views import my_render_wrapper, site
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import admin
 from django.utils import timezone
+from django.utils.safestring import mark_safe 
 
 class MissionFinalizeForm(forms.Form):
 	def __init__(self, mission_id, *args, **kwargs):
@@ -13,7 +14,8 @@ class MissionFinalizeForm(forms.Form):
 		participants = get_object_or_404(Mission, pk = mission_id).participants.all()
 		for char in participants:
 			self.fields['character_' + str(char.pk)] = forms.IntegerField(label = char.name)
-	text = forms.CharField(max_length = 10000)
+	text = forms.CharField(max_length = 10000, widget = forms.Textarea)
+	reward_money = forms.IntegerField()
 
 class nameurlpair:
 	name = ''
@@ -44,6 +46,7 @@ def mission_finalize(request, mission_id):
 		context = {'form': MissionFinalizeForm(mission_id), 'nup': nup}
 		return my_render_wrapper(request, 'admin_extra/missions_finalize.html', context)
 	elif request.method == 'POST':
+		mission = get_object_or_404(Mission, pk = mission_id)
 		form = MissionFinalizeForm(mission_id, request.POST)
 		participants = get_object_or_404(Mission, pk = mission_id).participants.all()
 		if form.is_valid():
@@ -52,7 +55,16 @@ def mission_finalize(request, mission_id):
 				exp = form.cleaned_data['character_' + str(char.pk)]
 				rewards.append((char.pk, exp,))
 			site().train()._add_exp_bulk(mission_id, rewards)
-			text = form.cleaned_data['text']
-			text = '...' # TODO form a post
-			#BlogEntry.create(author = get_object_or_404(Account, pk = request.user.pk), text = text, pub_date = timezone.now())
-			return HttpResponseRedirect(reverse('admin:index'))
+			money = form.cleaned_data['reward_money']
+
+			text  = 'Mission ' + mission.name + ' ended.<br>'
+			text += 'Money reward: ' + str(money) + '<br>'
+			text += 'Expirience: <br><ul>'
+			for char in participants:
+				text += ' <li> ' + char.name + ' gets ' + str(form.cleaned_data['character_' + str(char.pk)]) + '</li>'
+			text += '</ul><p>' + form.cleaned_data['text']
+
+			BlogEntry(author = get_object_or_404(Account, pk = request.user.pk), text = text, pub_date = timezone.now()).save()	
+			mission.status = 3
+			mission.save()
+			return HttpResponseRedirect(reverse('app:index'))
