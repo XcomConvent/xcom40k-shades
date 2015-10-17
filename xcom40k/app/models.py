@@ -79,7 +79,7 @@ class Mission(CommonToken):
 	)
 	participants = models.ManyToManyField(Char)
 	pub_date = models.DateTimeField()
-	finalize_date = models.DateTimeField(default = None)
+	finalize_date = models.DateTimeField(blank = True, null = True)
 	status = models.PositiveIntegerField(choices = MISSION_STATUS, default = 0)
 	def show_finalize_button(self):
 		s = ''
