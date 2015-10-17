@@ -29,7 +29,7 @@ def mission_changestate(request, mission_id, new_state):
 		mis = get_object_or_404(Mission, pk = mission_id)
 		mis.status = new_state
 		mis.save()
-		return HttpResponseRedirect('/admin/app/missions/') # TODO 
+		return HttpResponseRedirect('/admin/app/mission/') # TODO 
 	else:
 		return mission_finalize(request, mission_id)
 
