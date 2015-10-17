@@ -2,6 +2,9 @@
 
 {% block main %}
 <p> User: {{ target_user.username }}
+{% if target_user.pk == user.pk %}
+	{{target_user.account.money}}$
+{% endif %}
 <p> <a href = "{% url 'app:profile.users.edit' target_user.pk %}">Edit</a>
 
 <ul>

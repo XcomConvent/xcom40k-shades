@@ -1,0 +1,6 @@
+Mission {{mission_name}} ended! <br>
+Money reward: {{money_reward}}
+{% for chars in participants %}
+	<li> {{char.name}} gets {{reward.char}} xp </li>
+{% endfor %}
+<p>{{additional_text}}

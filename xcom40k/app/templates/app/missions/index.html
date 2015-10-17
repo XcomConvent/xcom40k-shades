@@ -5,6 +5,8 @@
 <ul>
 {% for mis in missions %}
 	<li> <a href = "{% url 'app:missions.view' mis.pk %}">{{ mis.name }}</a> </li>
+{% empty %}
+	No missions
 {% endfor %}
 </ul>
 

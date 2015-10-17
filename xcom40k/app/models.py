@@ -16,6 +16,7 @@ class CommonToken(models.Model):
 #		return HttpResponseRedirect('admin/app/')
 	class Meta:
 		abstract = True
+		unique_together = (('name',),)
 
 class Class(CommonToken):
 	pass
@@ -77,7 +78,7 @@ class Mission(CommonToken):
 		(2, 'Closed'),
 		(3, 'Finalized'),
 	)
-	participants = models.ManyToManyField(Char)
+	participants = models.ManyToManyField(Char, blank = True)
 	pub_date = models.DateTimeField()
 	finalize_date = models.DateTimeField(blank = True, null = True)
 	status = models.PositiveIntegerField(choices = MISSION_STATUS, default = 0)

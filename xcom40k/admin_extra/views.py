@@ -54,9 +54,9 @@ def mission_finalize(request, mission_id):
 			for char in participants:
 				exp = form.cleaned_data['character_' + str(char.pk)]
 				rewards.append((char.pk, exp,))
-			site().train()._add_exp_bulk(mission_id, rewards)
 			money = form.cleaned_data['reward_money']
-
+			site().train()._add_exp_money_bulk(mission_id, rewards, money)
+			
 			text  = 'Mission ' + mission.name + ' ended.<br>'
 			text += 'Money reward: ' + str(money) + '<br>'
 			text += 'Expirience: <br><ul>'

@@ -3,7 +3,7 @@
 {% block main %}
 
 <p> Item token:
-{{ it.item }} x{{it.count}}
+{{ it.item }} x{{it.count}}, price {{it.price}}
 <p> <form action = "{% url 'app:stash.tokens.buy' it.pk %}" method = 'POST'>
 {% csrf_token %}
 {{ form.as_p }}

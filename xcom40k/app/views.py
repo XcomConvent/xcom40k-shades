@@ -190,7 +190,7 @@ class site(SiteComponent):
 	class missions(SiteComponent):
 		TAG = 'MISSIONS'
 		def index(self, request):
-			ms = Mission.objects.all()
+			ms = Mission.objects.filter(status__lte = 2)
 			context = {'missions': ms}
 			return my_render_wrapper(request, 'app/missions/index.html', context)
 		class fly(SiteComponent):
@@ -277,14 +277,23 @@ class site(SiteComponent):
 			@login_required
 			def buy(self, request, token_id):				
 				it = get_object_or_404(ItemToken, pk = token_id)
+				your_money = request.user.account.money
 				if request.method == 'GET':
 					return my_render_wrapper(request, 'app/stash/token_view.html', {'form': TokenBuyForm(), 'it': it})	
 				elif request.method == 'POST':
 					form = TokenBuyForm(request.POST)
-					if form.is_valid() and form.cleaned_data['count'] <= it.count:
+					if form.is_valid() and int(form.cleaned_data['count']) <= int(it.count) and int(your_money) >= int(form.cleaned_data['count']) * int(it.price):
+ 						# money reduction
+						acc = request.user.account
+						acc.money -= form.cleaned_data['count']* it.price
+						acc.save()
+						# item transfer
 						self._transfer_it(get_object_or_404(User, username = 'root'), it, form.cleaned_data['count'], request.user)
+
 						return HttpResponseRedirect(reverse('app:stash.view'))
 					else:
+						print (your_money, form.cleaned_data['count'] * it.price)
+						print (form.is_valid(), form.cleaned_data['count'] <= it.count, your_money < form.cleaned_data['count'] * it.price)
 						return HttpResponseRedirect(reverse('app:stash.tokens.buy', args = (token_id,)))
 				else:
 					raise HttpResponseBadRequest('Invalid method, expected GET/POST, found ' + request.method)
@@ -303,7 +312,7 @@ class site(SiteComponent):
 	class train(SiteComponent):
 		TAG = 'TRAIN'
 
-		def _add_exp_bulk(self, mission_id, rewards):
+		def _add_exp_money_bulk(self, mission_id, rewards, money):
 			for reward in rewards:
 				target_pk = reward[0]
 				target_exp  = reward[1]
@@ -311,6 +320,11 @@ class site(SiteComponent):
 				target_char = get_object_or_404(Char.objects.filter(pk = target_pk))
 				target_char.exp += target_exp
 				target_char.save()
+
+				target_user = target_char.host
+				target_user.account.money += money
+				target_user.account.save()
+			pass
 
 		@login_required
 		def index(self, request):
