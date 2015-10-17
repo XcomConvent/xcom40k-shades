@@ -78,8 +78,8 @@ class Mission(CommonToken):
 		(3, 'Finalized'),
 	)
 	participants = models.ManyToManyField(Char)
-	pub_date = models.DateField()
-	finalize_date = models.DateField()
+	pub_date = models.DateTimeField()
+	finalize_date = models.DateTimeField(default = None)
 	status = models.PositiveIntegerField(choices = MISSION_STATUS, default = 0)
 	def show_finalize_button(self):
 		s = ''
@@ -97,7 +97,7 @@ class Mission(CommonToken):
 
 class Report(models.Model):
 	text = models.CharField(max_length = 10000)
-	pub_date = models.DateField()
+	pub_date = models.DateTimeField()
 	related_mission = models.ForeignKey(Mission)
 	related_char = models.ForeignKey(Char)
 
@@ -109,11 +109,13 @@ class NeuroRequest(models.Model):
 	teacher = models.ForeignKey(Char, related_name = "%(app_label)s_%(class)s_teacher")
 	pupil = models.ForeignKey(Char, related_name = "%(app_label)s_%(class)s_pupil")
 	target_class = models.ForeignKey(Class)
-	pub_date = models.DateField()
+	pub_date = models.DateTimeField()
 	status = models.PositiveIntegerField(choices = STATUS, default = 0)
-	closed_date = models.DateField()
+	closed_date = models.DateTimeField()
 
 class BlogEntry(CommonToken):
 	author = models.ForeignKey(Account)
 	text = models.TextField(max_length=10000)
-	pub_date = models.DateField()
+	pub_date = models.DateTimeField()
+	class Meta:
+		ordering = ['-pub_date']
