@@ -9,8 +9,13 @@
 	<hr>
 	<h2> Main: </h2>
 	{% block main %}
+		<ul>
+		{% for be in blog_entries %}
+			<li> <table border = '1'><tr><td>{{be.author}} posted at {{be.pub_date}}:</td></tr>
+				<tr><td>{{be.text}}</td></tr></table></li>
+		{% endfor %}
+		</ul>
 	{% endblock main %}
-
 	<hr>
 	<h2> Side: </h2>
 		<ul>

@@ -101,8 +101,9 @@ class site(SiteComponent):
 	TAG = 'MAIN'
 
 	def index(self, request):
-		context = {'list_components': get_component_list()}
-		return my_render_wrapper(request, 'app/index.html', context)
+		be = BlogEntry.objects.all()
+		context = {'list_components': get_component_list(), 'blog_entries': be}
+		return my_render_wrapper(request, 'app/mainpage.html', context)
 
 	def login(self, request):
 		template_response = views.login(request, template_name = 'app/auth/login.html')
@@ -130,21 +131,24 @@ class site(SiteComponent):
 
 		def index(self, request):
 #			self.Log.d('user "' + str(request.user.username) + '" views his profile')
-			return HttpResponseRedirect(reverse('app:profile.users.view'))
+			return HttpResponseRedirect(reverse('app:profile.users.view', args = (request.user.pk,)))
 
 		class users(SiteComponent):
 			TAG = 'USERS'
 
-			@login_required
-			def view(self, request):
-				related_chars = Char.objects.filter(host=request.user.pk)
-				context = {'user': request.user, 'related_chars': related_chars}
+			def view(self, request, user_id):
+				user = get_object_or_404(User, pk = user_id)
+				related_chars = Char.objects.filter(host = user.pk)
+				context = {'target_user': user, 'related_chars': related_chars}
 				return my_render_wrapper(request, 'app/profile/users/view.html', context)
 			
 			@login_required
-			def edit(self, request):
+			def edit(self, request, user_id):
 				if request.method == 'GET':
-					return my_render_wrapper(request, 'app/profile/users/edit.html', {'form': UserEditForm()})	
+					target_user = get_object_or_404(User, pk = user_id)
+					if (target_user.pk != request.user.pk):
+						return HttpResponseForbidden("Are you root?")
+					return my_render_wrapper(request, 'app/profile/users/edit.html', {'form': UserEditForm(), 'target_user': target_user})	
 				elif request.method == 'POST':
 					form = UserEditForm(request.POST)
 					if form.is_valid() and form.cleaned_data['password_new'] == form.cleaned_data['password_new_rpt']:

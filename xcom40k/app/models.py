@@ -50,6 +50,8 @@ class Account(models.Model):
 	user = models.OneToOneField(User, on_delete = models.CASCADE)
 	items = models.ManyToManyField(ItemToken, blank = True)
 	money = models.PositiveIntegerField(default = 0)
+	def __str__(self):
+		return self.user.username
 
 class ClassLevelPair(models.Model):
 	cls = models.ForeignKey(Class)
@@ -113,6 +115,6 @@ class NeuroRequest(models.Model):
 
 class BlogEntry(CommonToken):
 	author = models.ForeignKey(Account)
-	text = models.CharField(max_length=10000)
+	text = models.TextField(max_length=10000)
 	pub_date = models.DateField()
 

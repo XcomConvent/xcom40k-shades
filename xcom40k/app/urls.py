@@ -20,8 +20,8 @@ urlpatterns = [
     url(r'^profile/reports/(?P<report_id>[0-9]+)/edit/$', views.site().profile().reports().edit, name = 'profile.reports.edit'),
 #    url(r'^profile/reports/(?P<report_id>)/pdf/$', views.site().profile().reports().pdf, name = 'profile.reports.pdf'),
     ## users
-    url(r'^profile/users/view/$', views.site().profile().users().view, name = 'profile.users.view'),
-    url(r'^profile/users/edit/$', views.site().profile().users().edit, name = 'profile.users.edit'),
+    url(r'^profile/users/(?P<user_id>[0-9]+)/view/$', views.site().profile().users().view, name = 'profile.users.view'),
+    url(r'^profile/users/(?P<user_id>[0-9]+)/edit/$', views.site().profile().users().edit, name = 'profile.users.edit'),
     ## chars
     url(r'^profile/chars/new/$', views.site().profile().chars().new, name = 'profile.chars.new'),
     url(r'^profile/chars/(?P<char_id>[0-9]+)/view/$', views.site().profile().chars().view, name = 'profile.chars.view'),

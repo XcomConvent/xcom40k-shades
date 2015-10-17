@@ -6,7 +6,6 @@ from .models import *
 
 def finalize_mission(modeladmin, request, queryset):
 	for mis in queryset:
-
 		mis.status = 3
 		mis.save()
 finalize_mission.short_description = "Finalize selected missions"
@@ -55,6 +54,17 @@ class ItemAdmin(admin.ModelAdmin):
 class ItemTokenAdmin(admin.ModelAdmin):
 	actions = [add_to_public_stash,]
 
+class BlogEntryAdmin(admin.ModelAdmin):
+#	formfield_overrides = {
+#		models.TextField: {'widget': RichTextEditorWidget},
+#	}
+	list_display = ('author', 'pub_date',)
+	fieldsets = (
+		(None, {'fields': (('author', 'pub_date',),)}),
+		('Post', {'fields': (('text',),)}),
+	)
+
+admin.site.register(BlogEntry, BlogEntryAdmin)
 admin.site.register(Char, CharAdmin)
 admin.site.register(Ability, AbilityAdmin)
 admin.site.register(Class)

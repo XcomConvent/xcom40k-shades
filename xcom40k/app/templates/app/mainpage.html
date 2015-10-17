@@ -1,0 +1,11 @@
+{% extends "app/index.html" %}
+
+{% block main %}
+	Reaper?
+	<ul>
+	{% for be in blog_entries %}
+		<li> <table border = '1'><tr><td><a href = "{% url 'app:profile.users.view' be.author.pk %}">{{be.author}}</a> posted at {{be.pub_date}}:</td></tr>
+			<tr><td>{{be.text}}</td></tr></table></li>
+	{% endfor %}
+	</ul>
+{% endblock main %}
