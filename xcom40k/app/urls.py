@@ -47,6 +47,7 @@ urlpatterns = [
     url(r'^train/(?P<char_id>[0-9]+)/edit/$', views.site().train().edit, name = 'train.edit'),
     url(r'^neuro/$', views.site().train().neuro().index, name = 'train.neuro'),
     url(r'^neuro/add/$', views.site.train.neuro.NeuroRequestCreateViewGeneric.as_view(), name = 'train.neuro.add'),
+    url(r'^neuro/(?P<nrq_id>[0-9]+)/auth/$', views.site().train().neuro().auth, name = 'train.neuro.auth'),
 
     # rnd & stuff
     url(r'^rnd/storyline/$', views.site().nfo().storyline, name = 'nfo.storyline'),

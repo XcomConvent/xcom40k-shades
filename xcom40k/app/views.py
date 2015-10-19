@@ -43,6 +43,8 @@ class _Log:
 	def d(self, data):
 		self.logger.info    ('[' + self._str_complement('INFO', 8) + ' @ ' + str(timezone.now()) + '/' + BUILD_NAME + ' v' + str(BUILD_VERSION) + '] // ' 
 			+ self._str_complement(str(self.comp), 10) + ' //: ' + str(data))
+		print ('[' + self._str_complement('INFO', 8) + ' @ ' + str(timezone.now()) + '/' + BUILD_NAME + ' v' + str(BUILD_VERSION) + '] // ' 
+			+ self._str_complement(str(self.comp), 10) + ' //: ' + str(data))
 	def warn(self, data):
 		self.logger.warning ('[' + self._str_complement('WARNING', 8) + ' @ ' + str(timezone.now()) + '/' + BUILD_NAME + ' v' + str(BUILD_VERSION) + '] // ' 
 			+ self._str_complement(str(self.comp), 10) + ' //: ' + str(data))
@@ -363,8 +365,26 @@ class site(SiteComponent):
 			@login_required
 			def index(self, request):
 				nrequests = NeuroRequest.objects.filter(status = 0)
-				context = {'nrequests': nrequests}
+				can_authorize = True
+				context = {'nrequests': nrequests, 'can_authorize': can_authorize}
 				return my_render_wrapper(request, 'app/train/neuro.html', context)
+			def auth(self, request, nrq_id):
+				nrq = get_object_or_404(NeuroRequest, pk = nrq_id)
+				print(nrq.pupil, nrq.pupil.classes.all())
+				level = 0
+				if (len(nrq.pupil.classes.filter(cls = nrq.target_class)) != 0):
+					level = nrq.pupil.classes.filter(cls = nrq.target_class)[0].level
+					nrq.pupil.classes.filter(cls = nrq.target_class).delete()
+				new_clp = ClassLevelPair(cls = nrq.target_class, level = level + 1)
+				new_clp.save()
+				nrq.pupil.classes.add(new_clp)
+				
+				nrq.status = 1
+				nrq.closed_date = timezone.now()
+				nrq.save()
+				
+				self.Log.d('Nrq id ' + str(nrq.pk) + ' from {} to {} by {} authorized '.format(nrq.teacher, nrq.pupil, nrq.target_class))
+				return HttpResponseRedirect(reverse('app:train.neuro')) # I AM HERE
 
 			class NeuroRequestCreateViewGeneric(CreateView):
 				model = NeuroRequest
