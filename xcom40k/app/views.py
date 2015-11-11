@@ -231,8 +231,7 @@ class site(SiteComponent):
 	class stash(SiteComponent):
 		TAG = 'STASH'
 		def _get_public_stash(self):
-			root = get_object_or_404(User, username = 'root')
-			public_stash = root.account.items.all()
+			public_stash = ItemMarketToken.objects.all()
 			return public_stash
 
 		def index(self, request):
@@ -245,7 +244,7 @@ class site(SiteComponent):
 		class token(SiteComponent):
 			TAG = 'STASH-BUY'
 			def _transfer_it(self, source_user, item_token, qty, target_user):
-				if source_user is target_user:
+				if source_user.pk == target_user.pk:
 					return None
 				if item_token.count == qty:
 					item_token.delete()
@@ -254,40 +253,34 @@ class site(SiteComponent):
 					item_token.save()
 				these_item = target_user.account.items.filter(item = item_token.item)
 				if len(these_item) == 0:
-					target_user.account.items.create(item = item_token.item, count = qty)
+					newtoken = ItemToken.objects.create(item = item_token.item, count = qty)
+					newtoken.save()
+					target_user.account.items.add(newtoken)
 				else:
 					these_item[0].count += qty
 					these_item[0].save()
-				
-				s = ''
-				if source_user.username == 'root':
-					s = 'Public Stash'
-				else:
-					s = source_user.username
-
-				self.Log.d('[' + s + '] -> [' + target_user.username + '], item ' + str(item_token.item) + ' x' + str(qty) + '.')
+				target_user.save()
+				self.Log.d('[' + source_user.user.username + '] -> [' + target_user.username + '], item ' + str(item_token.item) + ' x' + str(qty) + '.')
 				return None
 
 			@login_required
-			def buy(self, request, token_id):				
-				it = get_object_or_404(ItemToken, pk = token_id)
+			def buy(self, request, market_token_id):				
+				imt = get_object_or_404(ItemMarketToken, pk = market_token_id)
 				your_money = request.user.account.money
 				if request.method == 'GET':
-					return my_render_wrapper(request, 'app/stash/token_view.html', {'form': TokenBuyForm(), 'it': it})	
+					return my_render_wrapper(request, 'app/stash/token_view.html', {'form': TokenBuyForm(), 'imt': imt})	
 				elif request.method == 'POST':
 					form = TokenBuyForm(request.POST)
-					if form.is_valid() and int(form.cleaned_data['count']) <= int(it.count) and int(your_money) >= int(form.cleaned_data['count']) * int(it.price):
+					if form.is_valid() and int(form.cleaned_data['count']) <= int(imt.item_token.count) and int(your_money) >= int(form.cleaned_data['count']) * int(imt.item_token.price):
  						# money reduction
 						acc = request.user.account
-						acc.money -= form.cleaned_data['count']* it.price
+						acc.money -= form.cleaned_data['count']* imt.item_token.price
 						acc.save()
 						# item transfer
-						self._transfer_it(get_object_or_404(User, username = 'root'), it, form.cleaned_data['count'], request.user)
+						self._transfer_it(imt.owner, imt.item_token, form.cleaned_data['count'], request.user)
 
 						return HttpResponseRedirect(reverse('app:stash.view'))
 					else:
-						print (your_money, form.cleaned_data['count'] * it.price)
-						print (form.is_valid(), form.cleaned_data['count'] <= it.count, your_money < form.cleaned_data['count'] * it.price)
 						return HttpResponseRedirect(reverse('app:stash.tokens.buy', args = (token_id,)))
 				else:
 					raise HttpResponseBadRequest('Invalid method, expected GET/POST, found ' + request.method)

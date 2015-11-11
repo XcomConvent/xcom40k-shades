@@ -10,11 +10,6 @@ def finalize_mission(modeladmin, request, queryset):
 		mis.save()
 finalize_mission.short_description = "Finalize selected missions"
 
-def add_to_public_stash(modeladmin, request, queryset):
-	User.objects.filter(pk = 1).items.add(queryset.all())
-add_to_public_stash.short_description = "Add to Public Stash"
-
-
 class CharAdmin(admin.ModelAdmin):
 	list_display = ('name','class_level_pairs')
 	view_on_site = True
@@ -52,7 +47,7 @@ class ItemAdmin(admin.ModelAdmin):
 	inlines = [ItemTokenInline,]
 
 class ItemTokenAdmin(admin.ModelAdmin):
-	actions = [add_to_public_stash,]
+	pass
 
 class BlogEntryAdmin(admin.ModelAdmin):
 #	formfield_overrides = {
@@ -75,3 +70,4 @@ admin.site.register(Report, ReportAdmin)
 admin.site.register(Account, AccountAdmin)
 admin.site.register(NeuroRequest, NeuroRequestAdmin)
 admin.site.register(ClassLevelPair, ClassLevelPairAdmin)
+admin.site.register(ItemMarketToken)
