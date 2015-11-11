@@ -1,6 +1,8 @@
 {% extends "app/index.html" %}
 
 {% block main %}
+
+<p> Char: {{char.name}} has {{char.exp}} idle xp 
 <form action="{% url 'app:train.edit' char.pk %}" method="post">
 	{% csrf_token %}
 	{{ form.as_p }}

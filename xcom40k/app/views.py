@@ -13,7 +13,7 @@ from .forms import *
 from .models import *
 from xcom40k.settings import BUILD_NAME, BUILD_VERSION
 from django.views.generic.edit import CreateView, UpdateView, ModelFormMixin
-
+from django.forms import formset_factory
 #from django.contrib.auth.decorators import login_required, user_passes_test
 
 def login_required(func):
@@ -42,6 +42,8 @@ class _Log:
 		return str(s) + (' ' * (count - len(s)))
 	def d(self, data):
 		self.logger.info    ('[' + self._str_complement('INFO', 8) + ' @ ' + str(timezone.now()) + '/' + BUILD_NAME + ' v' + str(BUILD_VERSION) + '] // ' 
+			+ self._str_complement(str(self.comp), 10) + ' //: ' + str(data))
+		print ('[' + self._str_complement('INFO', 8) + ' @ ' + str(timezone.now()) + '/' + BUILD_NAME + ' v' + str(BUILD_VERSION) + '] // ' 
 			+ self._str_complement(str(self.comp), 10) + ' //: ' + str(data))
 	def warn(self, data):
 		self.logger.warning ('[' + self._str_complement('WARNING', 8) + ' @ ' + str(timezone.now()) + '/' + BUILD_NAME + ' v' + str(BUILD_VERSION) + '] // ' 
@@ -100,35 +102,27 @@ class SiteComponent:
 class site(SiteComponent):
 	TAG = 'MAIN'
 
+	''' blog entries
+	'''
 	def index(self, request):
 		be = BlogEntry.objects.all()
 		context = {'list_components': get_component_list(), 'blog_entries': be}
 		return my_render_wrapper(request, 'app/mainpage.html', context)
-
+	''' auth 
+	'''
 	def login(self, request):
 		template_response = views.login(request, template_name = 'app/auth/login.html')
 		return template_response
-
+	''' logout -> index
+	'''
 	def logout(self, request):
 		views.logout(request)
 		return HttpResponseRedirect(reverse('app:index'))
 
-	# test component
-	# subjected to remove
-	def yourname(self, request):
-		Log.warn('user ' + request.user.username + ' is using app.yourname component')
-		if request.method == 'POST':
-			form = YourNameForm(request.POST)
-			if form.is_valid():
-				return HttpResponseRedirect('thanks/')
-		else:
-			form = YourNameForm()
-			return my_render_wrapper(request, 'app/yourname.html', {'form': form})
-	# end of test component
-
 	class profile(SiteComponent):
 		TAG = 'PROFILE'
 
+		@login_required
 		def index(self, request):
 #			self.Log.d('user "' + str(request.user.username) + '" views his profile')
 			return HttpResponseRedirect(reverse('app:profile.users.view', args = (request.user.pk,)))
@@ -328,43 +322,70 @@ class site(SiteComponent):
 
 		@login_required
 		def index(self, request):
-			charnames = map(str, Char.objects.filter(host = request.user.pk))
+			chars = Char.objects.filter(host = request.user.pk)
 			abilities = {}
-			for charname in charnames:
-				temp = map(str, Ability.objects.all())
-				temp = tuple(temp)
-				for aby in temp:
-					print aby
-				abilities.update({charname: temp})
-			context = {'charnames': charnames, 'abilities': abilities}
+			for char in chars:
+				abilities.update({char.name: char.abilities.all()})
+			context = {'chars': chars, 'abilities': abilities}
 
 			return my_render_wrapper(request, 'app/train/index.html', context)
 
 		@login_required
 		def edit(self, request, char_id):			
+			char = get_object_or_404(Char, pk = char_id)
 			if request.method == 'GET':
-				char = get_object_or_404(Char, pk = char_id)
 				class_level_pairs = char.classes.all()
+				class_ids = []
 				for clp in class_level_pairs:
-					print (clp.cls + ' of level ' + clp.level)
-				return HttpResponse('Everything is OK')
-#				return my_render_wrapper(request, 'app/train/edit.html', context)	
+					class_ids.append(clp.cls.pk)
+				context = {'char': char, 'form': AbilityTrainForm(class_ids = class_ids, char_id = char_id)}
+				
+				return my_render_wrapper(request, 'app/train/edit.html', context)	
 			elif request.method == 'POST':
 				form = AbilityTrainForm(request.POST)
 				if form.is_valid():
-					return HttpResponse('Everything is OK')
+					totalxpcost = 0
+					cleaned_data = form.parse(request.POST)
+					for clp in char.classes.all():
+						if 'abilities_cl{}'.format(str(clp.cls.pk)) in cleaned_data:
+							for ab in cleaned_data['abilities_cl{}'.format(clp.cls.pk)]:
+								if (ab not in char.abilities.all()):
+									totalxpcost += ab.exp_cost
+									char.abilities.add(ab)
+					char.exp -= totalxpcost
+					char.save()
+					return HttpResponseRedirect(reverse('app:train'))
 				else:
 					return HttpResponseRedirect(reverse('app:train.edit'))
 			else:
 				raise HttpResponseBadRequest('Invalid method, expected GET/POST, found ' + request.method)		
+
 		class neuro(SiteComponent):
 			TAG = 'NEURO'
 
 			@login_required
 			def index(self, request):
 				nrequests = NeuroRequest.objects.filter(status = 0)
-				context = {'nrequests': nrequests}
+				can_authorize = True
+				context = {'nrequests': nrequests, 'can_authorize': can_authorize}
 				return my_render_wrapper(request, 'app/train/neuro.html', context)
+			def auth(self, request, nrq_id):
+				nrq = get_object_or_404(NeuroRequest, pk = nrq_id)
+				print(nrq.pupil, nrq.pupil.classes.all())
+				level = 0
+				if (len(nrq.pupil.classes.filter(cls = nrq.target_class)) != 0):
+					level = nrq.pupil.classes.filter(cls = nrq.target_class)[0].level
+					nrq.pupil.classes.filter(cls = nrq.target_class).delete()
+				new_clp = ClassLevelPair(cls = nrq.target_class, level = level + 1)
+				new_clp.save()
+				nrq.pupil.classes.add(new_clp)
+				
+				nrq.status = 1
+				nrq.closed_date = timezone.now()
+				nrq.save()
+				
+				self.Log.d('Nrq id ' + str(nrq.pk) + ' from {} to {} by {} authorized '.format(nrq.teacher, nrq.pupil, nrq.target_class))
+				return HttpResponseRedirect(reverse('app:train.neuro')) # I AM HERE
 
 			class NeuroRequestCreateViewGeneric(CreateView):
 				model = NeuroRequest
