@@ -1,35 +1,127 @@
-<html>
-<head>
-</head>
-<body bgcolor = '#ffc'>
-<hr>
-<h1> Content:</h1>
+{% load staticfiles %}
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href='https://fonts.googleapis.com/css?family=Jura:400,500,600,300&subset=latin,cyrillic' rel='stylesheet'
+      type='text/css'>
+<link rel="stylesheet" type="text/css" href="{% static 'app/st.css' %}"/>
+<!---	<link rel="icon" type="image/png" href="img/favicon.png"> NO ICON--->
+
+<title>{% block title %} X-COM 40000 {% endblock %}</title>
+
 {% block content %}
+<body>
+<div id="right">
+    <div id="map">
+        <div id="top">
+            <div class="mgrad">
+            </div>
+            <div id="topline">
+            </div>
+            <div id="topleft">
+                {% include "app/nya/top.html" %}
+            </div>
+            <div id="topright">
+                {% include "app/nya/top.html" %}
+            </div>
+            <div class="panelgrad3">
+            </div>
+        </div>
+        <div id="bot">
+            <div class="mgrad">
+            </div>
+            <div id="botleft">
+                {% include "app/nya/bot.html" %}
+            </div>
+            <div id="botright">
+                {% include "app/nya/bot.html" %}
+            </div>
+        </div>
+        <div class="panelgrad">
+        </div>
+        <div class="panel">
+            {% include "app/nya/panel.html" %}
+        </div>
+        <div class="panelgrad2">
+        </div>
+        <div id="leftcontrey">
+            <!-- ПОКАЗАТЕЛИ СТРАН СЛЕВА -->
+        </div>
+        <div id="mappy">
+            <div class="stick">
+                <div class="stickgrad">
+                </div>
+            </div>
+            <div class="stick" id="stickright">
+                <div class="stickgrad">
+                </div>
+            </div>
+            <div id="monic">
+                <!-- КАРТА -->
+            </div>
+        </div>
+        <div id="rightcontrey">
+            <!-- ПОКАЗАТЕЛИ СТРАН СПРАВА -->
+        </div>
+        <div id="news">
+            <div id="newsleft">
+                {% for be in blog_entries %}
+                <div class="newspadd">
+                    {% include "app/nya/news.html" %}
+                    <div class="containernews">
+                        <text class="menutext"> {{be.author}} posted at {{be.pub_date}}:
+                        {{be.text}}
+                        </text>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div id="newsright">
+                <div class="newspadd">
+                    {% include "app/nya/news.html" %}
+                    <div class="containernews">
+                        <!-- ТУТА МИССИИ -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="left">
+    <div id="logobg">
+        <div id="logo">
+        </div>
+    </div>
+    <div id="charlogo">
+    </div>
+    <div id="buttons">
+        <div id="butt">
+            {% for component in list_components %}
+            <div class="nine">
+                {% include "app/nya/buttom.html" %}
+                <svg version="1.1"  class="svp"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 258.9 56.3" style="enable-background:new 0 0 258.9 56.3;" xml:space="preserve">
+			    <!--<li><a href = "{% url 'app:index' %}{{ component.url }}">{{ component.name }}</a></li>-->
+				<text transform="matrix(1 0 0 1 25 35)" class="menutext">{{ component.name }}</text>
+				</svg>
+            </div>
+            {% endfor %}
 
-	<hr>
-	<h2> Main: </h2>
-	{% block main %}
-		<ul>
-		{% for be in blog_entries %}
-			<li> <table border = '1'><tr><td>{{be.author}} posted at {{be.pub_date}}:</td></tr>
-				<tr><td>{{be.text}}</td></tr></table></li>
-		{% endfor %}
-		</ul>
-	{% endblock main %}
-	<hr>
-	<h2> Side: </h2>
-		<ul>
-		{% for component in list_components %}
-			<li><a href = "{% url 'app:index' %}{{ component.url }}">{{ component.name }}</a></li>
-		{% endfor %}
-		</ul>
-
-	{% if user.username == '' %}
-	<hr>
-	<h2> Login: </h2>
-	{% include 'app/auth/login.html' %}
-	{% endif %}
-{% endblock content %}
-<hr>
+            {% if user.username == '' %}
+            <div id="login">
+                {% include "app/nya/login.html" %}
+                <!-- НАЧАЛО ФОРМЫ ВХОДА -->
+                <form id="slick-login">
+                    <!-- ЛОГИН -->
+                    <input type="text" name="username" class="placeholder" placeholder="логин">
+                    <!-- ПАРОЛЬ -->
+                    <input type="password" name="password" class="placeholder" placeholder="пароль">
+                    <!-- КНОПКА ВХОДА -->
+                    <input type="submit" value="ВОЙТИ">
+                </form>
+                <!-- КОНЕЦ ФОРМЫ ВХОДА -->
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 </body>
-</html>
+{% endblock content %}
+
