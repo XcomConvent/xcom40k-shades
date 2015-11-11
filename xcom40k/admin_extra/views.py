@@ -9,7 +9,8 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe 
 
 class MissionFinalizeForm(forms.Form):
-	def __init__(self, mission_id, *args, **kwargs):
+	def __init__(self, *args, **kwargs):
+		mission_id = kwargs.pop('char_id', None)
 		super(MissionFinalizeForm, self).__init__(*args, **kwargs)
 		participants = get_object_or_404(Mission, pk = mission_id).participants.all()
 		for char in participants:
@@ -43,11 +44,11 @@ def mission_finalize(request, mission_id):
 				report_id = rrr[0].pk
 				url_report = reverse('app:profile.reports.view', args = (report_id,))
 				nup.append(nameurlpair(name=char.name, url=url_report))
-		context = {'form': MissionFinalizeForm(mission_id), 'nup': nup}
+		context = {'form': MissionFinalizeForm(mission_id = mission_id), 'nup': nup}
 		return my_render_wrapper(request, 'admin_extra/missions_finalize.html', context)
 	elif request.method == 'POST':
 		mission = get_object_or_404(Mission, pk = mission_id)
-		form = MissionFinalizeForm(mission_id, request.POST)
+		form = MissionFinalizeForm(request.POST)
 		participants = get_object_or_404(Mission, pk = mission_id).participants.all()
 		if form.is_valid():
 			rewards = []

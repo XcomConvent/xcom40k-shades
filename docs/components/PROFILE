@@ -1,0 +1,28 @@
+PROFILE consists of following componenets:
+	* users
+	* chars
+	* reports
+Look up app/urls.py for detailed path spec.
+
+PROFILE.users contains info about Account model (which, consequently, contains OneToOne to User model).
+
+PROFILE.profile contains info about user's chars (Char model), allows to view any char, edit self's. 
+
+PROFILE.reports contains links to reports (stored at /static/reports/<username>/), allows to create new.
+
+URLS:
+	For each url you may look up functions called in app/views.py and it's reverse name in app/urls.py 
+	^ = server's url
+	
+	url regex | description
+    ^profile/$ | redirect to self's profile 
+    ^profile/users/(?P<user_id>[0-9]+)/reports/$' | list of user's reports
+    ^profile/users/(?P<user_id>[0-9]+)/reports/(?P<report_id>[0-9]+)/view/$ | view target report
+    ^profile/users/(?P<user_id>[0-9]+)/reports/(?P<report_id>[0-9]+)/edit/$ | edit target report
+    ^profile/users/(?P<user_id>[0-9]+)/reports/(?P<report_id>)/pdf/$ | generate a pdf of reports for print
+    ^profile/users/(?P<user_id>[0-9]+)/view/$ | view target user
+    ^profile/users/(?P<user_id>[0-9]+)/edit/$ | edit target user's password etc.
+	^profile/chars/new/$ | create new character
+    ^profile/chars/(?P<char_id>[0-9]+)/view/$ | view target character
+	^profile/chars/(?P<char_id>[0-9]+)/edit/$ | edit target character's name; abilities can be edited in /train/
+	...
