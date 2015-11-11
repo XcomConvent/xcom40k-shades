@@ -116,7 +116,7 @@ class site(SiteComponent):
 	''' logout -> index
 	'''
 	def logout(self, request):
-		views.logout(request)
+		views.loginout(request)
 		return HttpResponseRedirect(reverse('app:index'))
 
 	class profile(SiteComponent):
@@ -400,7 +400,7 @@ class site(SiteComponent):
 		def storyline(self, request):
 			return HttpResponse('Our heroic storyline')
 		def rnd(self, request):
-			return HttpResponseRedirect('wiki/')
+			return HttpResponse('<html><head><meta http-equiv="refresh" content="0; url=http://185.58.204.210/xcom40k-wiki/site" /></head></html>')
 		def recruit(self, request):
 			return HttpResponseRedirect('wiki/Recruitment.html')
 

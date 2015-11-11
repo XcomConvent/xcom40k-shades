@@ -1,5 +1,7 @@
 from . import views
 from django.conf.urls import include, url
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
 	# index page
@@ -51,3 +53,4 @@ urlpatterns = [
     url(r'^rnd/rnd/$', views.site().nfo().rnd, name = 'nfo.rnd'), # wiki engine? Markdoc
     url(r'^rnd/recruit/$', views.site().nfo().recruit, name = 'nfo.recruit'),
 ]
+
