@@ -53,4 +53,7 @@ urlpatterns = [
     url(r'^rnd/storyline/$', views.site().nfo().storyline, name = 'nfo.storyline'),
     url(r'^rnd/rnd/$', views.site().nfo().rnd, name = 'nfo.rnd'), # wiki engine? Markdoc
     url(r'^rnd/recruit/$', views.site().nfo().recruit, name = 'nfo.recruit'),
+
+    #vk
+    url(r'http://vk.com/xcom40000', views.site().nfo().vk, name = 'vk')
 ]
