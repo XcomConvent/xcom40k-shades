@@ -3,87 +3,15 @@
 <link href='https://fonts.googleapis.com/css?family=Jura:400,500,600,300&subset=latin,cyrillic' rel='stylesheet'
       type='text/css'>
 <link rel="stylesheet" type="text/css" href="{% static 'app/st.css' %}"/>
-<!---	<link rel="icon" type="image/png" href="img/favicon.png"> NO ICON--->
+<link rel="icon" type="image/png" href="img/favicon.png">
 
 <title>{% block title %} X-COM 40000 {% endblock %}</title>
 
 {% block content %}
 <body>
 <div id="right">
-    <div id="map">
-        <div id="top">
-            <div class="mgrad">
-            </div>
-            <div id="topline">
-            </div>
-            <div id="topleft">
-                {% include "app/nya/top.html" %}
-            </div>
-            <div id="topright">
-                {% include "app/nya/top.html" %}
-            </div>
-            <div class="panelgrad3">
-            </div>
-        </div>
-        <div id="bot">
-            <div class="mgrad">
-            </div>
-            <div id="botleft">
-                {% include "app/nya/bot.html" %}
-            </div>
-            <div id="botright">
-                {% include "app/nya/bot.html" %}
-            </div>
-        </div>
-        <div class="panelgrad">
-        </div>
-        <div class="panel">
-            {% include "app/nya/panel.html" %}
-        </div>
-        <div class="panelgrad2">
-        </div>
-        <div id="leftcontrey">
-            <!-- ПОКАЗАТЕЛИ СТРАН СЛЕВА -->
-        </div>
-        <div id="mappy">
-            <div class="stick">
-                <div class="stickgrad">
-                </div>
-            </div>
-            <div class="stick" id="stickright">
-                <div class="stickgrad">
-                </div>
-            </div>
-            <div id="monic">
-                <!-- КАРТА -->
-            </div>
-        </div>
-        <div id="rightcontrey">
-            <!-- ПОКАЗАТЕЛИ СТРАН СПРАВА -->
-        </div>
-        <div id="news">
-            <div id="newsleft">
-                {% for be in blog_entries %}
-                <div class="newspadd">
-                    {% include "app/nya/news.html" %}
-                    <div class="containernews">
-                        <text class="menutext"> {{be.author}} posted at {{be.pub_date}}:
-                        {{be.text}}
-                        </text>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            <div id="newsright">
-                <div class="newspadd">
-                    {% include "app/nya/news.html" %}
-                    <div class="containernews">
-                        <!-- ТУТА МИССИИ -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% block main %}
+    {% endblock main %}
 </div>
 <div id="left">
     <div id="logobg">
