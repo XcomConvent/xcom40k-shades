@@ -2,9 +2,9 @@
 
 {% block main %}
 
-<p> Item token:
-{{ it.item }} x{{it.count}}, price {{it.price}}
-<p> <form action = "{% url 'app:stash.tokens.buy' it.pk %}" method = 'POST'>
+<p> item token:
+{{ imt.item_token.item }} x{{imt.item_token.count}}, price {{imt.item_token.price}}
+<p> <form action = "{% url 'app:stash.tokens.buy' imt.item_token.pk %}" method = 'POST'>
 {% csrf_token %}
 {{ form.as_p }}
 <input type="submit" value="OK" />

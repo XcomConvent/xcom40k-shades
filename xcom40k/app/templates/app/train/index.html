@@ -5,12 +5,12 @@
 <p><a href = "{% url 'app:train.neuro' %}"> Neurotraining </a>
 
 <p><table border = "1">
-{% for charname in charnames %}
+{% for char in chars %}
 	<tr><td>
-		<p>Char {{charname}}
+		<p>Char <a href = "{% url 'app:train.edit' char.pk %}">{{char.name}}</a>
 		<p>Abilities:<ul>
 		{% for aby in abilities.items %}
-			{% if aby.0 == charname %}
+			{% if aby.0 == char.name %}
 			{% for a in aby.1 %}
 				<li> {{a}} </li>
 			{% endfor %}

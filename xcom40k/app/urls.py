@@ -1,5 +1,7 @@
 from . import views
 from django.conf.urls import include, url
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
 	# index page
@@ -9,19 +11,16 @@ urlpatterns = [
     url(r'^login/$', views.site().login, name = 'login'),
     url(r'^logout/$', views.site().logout, name = 'logout'),
     
-    # testing form
-    url(r'^your-name/$', views.site().yourname, name = 'yourname'),
-
     # profiles
     url(r'^profile/$', views.site().profile().index, name = 'profile'),
-    ## reports 
-    url(r'^profile/reports/$', views.site().profile().reports().index, name = 'profile.reports'),
-    url(r'^profile/reports/(?P<report_id>[0-9]+)/view/$', views.site().profile().reports().view, name = 'profile.reports.view'),
-    url(r'^profile/reports/(?P<report_id>[0-9]+)/edit/$', views.site().profile().reports().edit, name = 'profile.reports.edit'),
-#    url(r'^profile/reports/(?P<report_id>)/pdf/$', views.site().profile().reports().pdf, name = 'profile.reports.pdf'),
     ## users
     url(r'^profile/users/(?P<user_id>[0-9]+)/view/$', views.site().profile().users().view, name = 'profile.users.view'),
     url(r'^profile/users/(?P<user_id>[0-9]+)/edit/$', views.site().profile().users().edit, name = 'profile.users.edit'),
+    ## reports 
+    url(r'^profile/users/(?P<user_id>[0-9]+)/reports/$', views.site().profile().reports().index, name = 'profile.reports'),
+    url(r'^profile/users/(?P<user_id>[0-9]+)/reports/(?P<report_id>[0-9]+)/view/$', views.site().profile().reports().view, name = 'profile.reports.view'),
+    url(r'^profile/users/(?P<user_id>[0-9]+)/reports/(?P<report_id>[0-9]+)/edit/$', views.site().profile().reports().edit, name = 'profile.reports.edit'),
+#    url(r'^profile/users/(?P<user_id>[0-9]+)/reports/(?P<report_id>)/pdf/$', views.site().profile().reports().pdf, name = 'profile.reports.pdf'),
     ## chars
     url(r'^profile/chars/new/$', views.site().profile().chars().new, name = 'profile.chars.new'),
     url(r'^profile/chars/(?P<char_id>[0-9]+)/view/$', views.site().profile().chars().view, name = 'profile.chars.view'),
@@ -38,7 +37,7 @@ urlpatterns = [
     # stash
     url(r'^stash/$', views.site().stash().index, name = 'stash'),
     url(r'^stash/view/$', views.site().stash().view, name = 'stash.view'),
-    url(r'^stash/(?P<token_id>[0-9]+)/buy/$', views.site().stash().token().buy, name = 'stash.tokens.buy'),
+    url(r'^stash/(?P<market_token_id>[0-9]+)/buy/$', views.site().stash().token().buy, name = 'stash.tokens.buy'),
     url(r'^stash/sell/add/$', views.site().stash().sell().add, name = 'stash.sell.add'),
     url(r'^stash/sell/make/$', views.site().stash().sell().make, name = 'stash.sell.make'),
 
@@ -57,3 +56,4 @@ urlpatterns = [
     #vk
     url(r'http://vk.com/xcom40000', views.site().nfo().vk, name = 'vk')
 ]
+

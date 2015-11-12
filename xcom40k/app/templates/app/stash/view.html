@@ -3,9 +3,9 @@
 {% block main %}
 
 <ul>
-{% for it in tokens %}
-	{% if it.available %}
-	<li> <a href = "{% url 'app:stash.tokens.buy' it.pk %}">{{ it }}</a> </li>
+{% for imt in tokens %}
+	{% if imt.item_token.available %}
+	<li> <a href = "{% url 'app:stash.tokens.buy' imt.pk %}">{{ imt.item_token }}</a> from <a href = "{% url 'app:profile.users.view' imt.owner.pk %}">{{ imt.owner }}</a> </li>
 	{% endif %}
 {% endfor %}
 </ul>

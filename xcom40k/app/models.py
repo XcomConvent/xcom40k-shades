@@ -45,14 +45,18 @@ class ItemToken(models.Model):
 	def __str__(self):
 		return self.item.name + ' x' + str(self.count)
 
-# we strongly recommend you not use Account model; 
-# use django.contrib.auth.User model instead in any occurence you don't know which to choose.
 class Account(models.Model):
 	user = models.OneToOneField(User, on_delete = models.CASCADE)
 	items = models.ManyToManyField(ItemToken, blank = True)
 	money = models.PositiveIntegerField(default = 0)
 	def __str__(self):
 		return self.user.username
+
+class ItemMarketToken(models.Model):
+	item_token = models.ForeignKey(ItemToken)
+	owner = models.ForeignKey(Account)
+	def __str__(self):
+		return '{} from account {}'.format(self.item_token, self.owner)
 
 class ClassLevelPair(models.Model):
 	cls = models.ForeignKey(Class)
