@@ -54,6 +54,6 @@ urlpatterns = [
     url(r'^rnd/recruit/$', views.site().nfo().recruit, name = 'nfo.recruit'),
 
     #vk
-    url(r'http://vk.com/xcom40000', views.site().nfo().vk, name = 'vk')
+    url(r'^rnd/vk/$', views.site().nfo().vk, name = 'vk')
 ]
 
