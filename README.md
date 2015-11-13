@@ -10,6 +10,6 @@ Art: Jemar
 
 Design: Gabriel
 
-Programming: marqueewinq
+Programming: marqueewinq, arlenka
 
 Testing: gekkonina
